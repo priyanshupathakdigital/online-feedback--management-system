@@ -1,0 +1,10 @@
+feedback-system/
+│
+├── app.py
+├── templates/
+│   ├── index.html
+│   ├── feedback.html
+│   └── admin.html
+├── static/
+│   └── style.css
+└── requirements.txt

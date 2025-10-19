@@ -1,0 +1,44 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_mysqldb import MySQL
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# MySQL connection
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'your_mysql_password'
+app.config['MYSQL_DB'] = 'feedback_db'
+
+mysql = MySQL(app)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/feedback', methods=['GET', 'POST'])
+def feedback():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        message = request.form['message']
+
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO feedback(name, email, message) VALUES(%s, %s, %s)", (name, email, message))
+        mysql.connection.commit()
+        cur.close()
+        flash('Thank you for your feedback!', 'success')
+        return redirect(url_for('feedback'))
+
+    return render_template('feedback.html')
+
+@app.route('/admin')
+def admin():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM feedback")
+    data = cur.fetchall()
+    cur.close()
+    return render_template('admin.html', feedbacks=data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
